@@ -4,6 +4,7 @@ on lcs login ang user data
 '''
 
 from datetime import datetime
+from dateutil.parser import parse
 from functools import wraps
 
 import requests
@@ -77,28 +78,45 @@ def check_response(response):
     RequestError.check(response)
     CredentialError.check(response)
 
-login_hooks = []
+_login_hooks = []
 def on_login(f):
     '''
     decorator. call the decorated function whenever we find a new user
     use case: get their profile and update local db.
     function should take in the user object as the first param
     '''
-    login_hooks += f
+    global _login_hooks
+    _login_hooks += [f]
     return f
+
+def call_login_hooks(user_profile):
+    for hook in _login_hooks:
+        hook(user_profile)
     
 _token_cache = {}
+# cache of tokens for quickly checking validate and determining if something
+# counts as a login. if we validate a token we haven't seen before, it qualifies
+# as a login
+
 def validate_token(email, token):
     '''validates an lcs token and email pair'''
-    #todo check cache first
-    data = {'email': email, 'token': token}
-    response = post('/validate', json=data)
+    if token in _token_cache:
+        # if we've already seen the token we can just check the expiration
+        expiration = parse(_token_cache[token]['valid_until'])
+    else:
+        # else we need to check with lcs and call login hooks
+        data = {'email': email, 'token': token}
+        response = post('/validate', json=data)
 
-    check_response(response)
-    result = response.json()
-    # todo check expiration
-    # todo cache token and then call on_logins on cache insert
-    return response.json()['body']
+        check_response(response)
+        result = response.json()
+        user_profile = result['body']
+        # find the token we have in the user's profile
+        token_object = [tok for tok in user_profile['auth'] if tok['token'] == token][0]
+        _token_cache[token] = token_object
+        call_login_hooks(user_profile)
+
+        return token_object
 
 def login(email, password):
     '''gets a token for a user'''
@@ -107,8 +125,13 @@ def login(email, password):
     
     check_response(response)
     result = response.json()
-    #todo cache insert and call get profile to call on_logins
-    return result['body']['auth']
+    token_object = result['body']['auth']
+
+    # insert into cache and call login hooks
+    _token_cache[token_object['token']] = token_object
+    call_login_hooks(get_profile(email, token_object['token']))
+    
+    return token_object
 
 def get_profile(email, token, auth_email=None):
     '''
@@ -152,3 +175,6 @@ class User:
     def dm_link_for(other_user):
         '''get a dm link for another user's slack'''
         return get_dm_for(self.email, self.token, other_user)
+
+#TODO write tests
+#TODO Gen documentation
