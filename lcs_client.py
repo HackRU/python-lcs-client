@@ -49,13 +49,13 @@ class ResponseError(Exception):
             self.status_code = response.json()['statusCode']
         else:
             self.status_code = response.status_code
-            
+
     def __str__(self):
             return 'status: %d response: %s' % (self.status_code, self.response.json())
 
 class InternalServerError(ResponseError):
     @staticmethod
-    def check(response):        
+    def check(response):
         if response.status_code >= 500 or response.json().get('statusCode', 0) >= 500:
             raise InternalServerError(response)
 
@@ -92,7 +92,7 @@ def on_login(f):
 def call_login_hooks(user_profile):
     for hook in _login_hooks:
         hook(user_profile)
-    
+
 _token_cache = {}
 # cache of tokens for quickly checking validate and determining if something
 # counts as a login. if we validate a token we haven't seen before, it qualifies
@@ -122,7 +122,7 @@ def login(email, password):
     '''gets a token for a user'''
     data = {'email': email, 'password': password}
     response = post('/authorize', json=data)
-    
+
     check_response(response)
     result = response.json()
     token_object = result['body']['auth']
@@ -130,7 +130,7 @@ def login(email, password):
     # insert into cache and call login hooks
     _token_cache[token_object['token']] = token_object
     call_login_hooks(get_profile(email, token_object['token']))
-    
+
     return token_object
 
 def get_profile(email, token, auth_email=None):
