@@ -1,0 +1,12 @@
+site_name: "lcs_client"
+
+generate:
+  - lcs_client.md:
+    - lcs_client++
+#  - lcs_client_user.md:
+#    - lcs_client.User+
+
+pages:
+  - Home: index.md << README.md
+  - lcs_client: lcs_client.md
+#  - lcs User class: lcs_client_user.md

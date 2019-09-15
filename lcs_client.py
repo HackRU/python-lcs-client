@@ -10,36 +10,44 @@ from functools import wraps
 import requests
 
 LCS_URL_ROOT = 'https://api.hackru.org'
-'''the url where lcs is'''
+def set_root_url(url):
+    '''sets root url. defaults to `https://api.hackru.org`'''
+    # this is annoying but gets the autogen docs to work
+    global LCS_ROOT_URL
+    LCS_ROOT_URL = url
 
-TESTING = True
-'''weather or not to use test endpoint'''
+TESTING = False
+def set_testing(testing):
+    '''weather or not to use test endpoint, defaults to `False`'''
+    # this is annoying but gets the autogen docs to work
+    global TESTING
+    TESTING = testing
 
-def base_url():
-    '''get the lcs base url'''
-    if TESTING:
-        return LCS_URL_ROOT + '/dev'
-    else:
-        return LCS_URL_ROOT + '/prod'
-
-def get(endpoint, *args, **kwargs):
-    '''does get request to lcs endpoint'''
-    return requests.get(base_url() + endpoint, *args, **kwargs)
-
-def post(endpoint, *args, **kwargs):
-    '''does post request to lcs endpoint'''
-    return requests.post(base_url() + endpoint, *args, **kwargs)
-
-def pluck(_dict, *keys, defaults={}):
+class User:
     '''
-    util function. pluck keys from a dict and remove the rest
-    if the key does not exist it will look into defaults.
-    if there is no default it will throw a key error
+    a user object to easily call other endpoints on behalf of a user
+    constructor logs the user and gets a handle. requires you to pass a token OR a password
     '''
-    new = {}
-    for key in keys:
-        new[key] = _dict.get(key, defaults[key])
+    def __init__(self, email, password=None, token=None):
+        if not password and not token:
+            raise Exception('must provide token or password to login')
 
+        self.email = email
+        if password:
+            full_token = login(email, password)
+            self.token = full_token['token']
+
+        if token:
+            validate_token(email, token)
+            self.token = token
+
+    def profile(self):
+        '''call lcs to get the user's profile'''
+        return get_profile(self.email, self.token)
+
+    def dm_link_for(self, other_user):
+        '''get a dm link for another user's slack __NOT IMPLMIMENTED YET__'''
+        return get_dm_for(self.email, self.token, other_user)
 
 class ResponseError(Exception):
     '''error with an attached http Response'''
@@ -84,6 +92,12 @@ def on_login(f):
     decorator. call the decorated function whenever we find a new user
     use case: get their profile and update local db.
     function should take in the user object as the first param
+    
+    ```python
+    @lcs_client.on_login
+    def your_func(user_profile):
+        # updating the user profile or something
+    ```
     '''
     global _login_hooks
     _login_hooks += [f]
@@ -149,32 +163,25 @@ def get_profile(email, token, auth_email=None):
     return response.json()['body'][0]
 
 def get_dm_for(email, token, other_user):
-    '''get a dm link to talk with another user on slack'''
+    '''
+    get a dm link to talk with another user on slack. __NOT YET IMPLEMENTED__
+    '''
     raise Exception('not yet implemented')
 
-class User:
-    '''a user object to easily call other endpoints on behalf of a user'''
-    def __init__(self, email, password=None, token=None):
-        '''log the user and get a handle. requires'''
-        if not password and not token:
-            raise Exception('must provide token or password to login')
+def base_url():
+    '''get the lcs base url'''
+    if TESTING:
+        return LCS_URL_ROOT + '/dev'
+    else:
+        return LCS_URL_ROOT + '/prod'
 
-        self.email = email
-        if password:
-            full_token = login(email, password)
-            self.token = full_token['token']
+def get(endpoint, *args, **kwargs):
+    '''does get request to lcs endpoint'''
+    return requests.get(base_url() + endpoint, *args, **kwargs)
 
-        if token:
-            validate_token(email, token)
-            self.token = token
-
-    def profile(self):
-        '''call lcs to get the user's profile'''
-        return get_profile(self.email, self.token)
-
-    def dm_link_for(other_user):
-        '''get a dm link for another user's slack'''
-        return get_dm_for(self.email, self.token, other_user)
+def post(endpoint, *args, **kwargs):
+    '''does post request to lcs endpoint'''
+    return requests.post(base_url() + endpoint, *args, **kwargs)
 
 #TODO write tests
 #TODO Gen documentation
