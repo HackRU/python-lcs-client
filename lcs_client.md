@@ -1,7 +1,7 @@
 <h1 id="lcs_client">lcs_client</h1>
 
 
-This is intended to be a serverside to help with hackru services that biggie back
+This is intended to be a serverside client to help with hackru services that biggie back
 on lcs login ang user data
 
 <h2 id="lcs_client.set_root_url">set_root_url</h2>

@@ -1,5 +1,5 @@
 '''
-This is intended to be a serverside to help with hackru services that biggie back
+This is intended to be a serverside client to help with hackru services that biggie back
 on lcs login ang user data
 '''
 

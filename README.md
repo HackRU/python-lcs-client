@@ -21,6 +21,7 @@ pip install -r requirements
 ```bash
 # do local setup
 python -m pydocmd build
+cp _build/pydocmd/lcs_client.md .
 # check it out before you push
 python -m pydocmd server
 ```
