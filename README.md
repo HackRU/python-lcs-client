@@ -32,3 +32,11 @@ python -m pydocmd server
 pip install -r example_requirements.txt
 python example_api.py
 ```
+
+## release on pypi
+```bash
+#do local setup
+pip install setuptools twine
+python setup.py sdist
+twine upload dist/<version>.tar.gz
+```
