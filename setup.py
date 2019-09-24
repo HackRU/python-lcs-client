@@ -1,7 +1,10 @@
 from distutils.core import setup
 
-with open('README.md') as f:
-    readme_text = f.read()
+try:
+    with open('README.md') as f:
+        readme_text = f.read()
+except:
+    pass
     
 setup(
     name = 'lcs_client',
