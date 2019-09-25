@@ -4,14 +4,14 @@ try:
     with open('README.md') as f:
         readme_text = f.read()
 except:
-    pass
+    readme_text = ""
     
 setup(
     name = 'lcs_client',
     packages = ['lcs_client'],
     description = 'a python client for interacting with the hackru backend',
     long_description = readme_text,
-    version = '1.1',
+    version = '1.3',
     license = '',
     author = 'author',
     author_email = 'rnd@hackru.org',
