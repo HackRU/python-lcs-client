@@ -16,7 +16,7 @@ setup(
     author = 'author',
     author_email = 'rnd@hackru.org',
     url = 'https://github.com/HackRU/python-lcs-client',
-    install_requires = ['requests'],
+    install_requires = ['requests', 'python-dateutil'],
     classifiers = [
         'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 3',
