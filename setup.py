@@ -1,25 +1,37 @@
-from distutils.core import setup
+import pathlib
 
-try:
-    with open('README.md') as f:
-        readme_text = f.read()
-except:
-    readme_text = ""
-    
+from setuptools import setup
+
+CURR_DIR = pathlib.Path(__file__).parent
+README = (CURR_DIR / "README.md").read_text()
+
 setup(
-    name = 'lcs_client',
-    packages = ['lcs_client'],
-    description = 'a python client for interacting with the hackru backend',
-    long_description = readme_text,
-    version = '1.3',
-    license = '',
-    author = 'author',
-    author_email = 'rnd@hackru.org',
-    url = 'https://github.com/HackRU/python-lcs-client',
-    install_requires = ['requests', 'python-dateutil'],
-    classifiers = [
-        'Development Status :: 4 - Beta',
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License'
-    ],
+        name='lcs_client',
+        version='2.0.0',
+        packages=['lcs_client'],
+
+        install_requires=['requests>=2.0'],
+
+        description='Client for interacting with LCS, the HackRU backend',
+        long_description=README,
+        long_description_content_type='text/markdown',
+        url='https://github.com/HackRU/python-lcs-client',
+        author='HackRU RnD',
+        author_email='rnd@hackru.org',
+        license='MIT',
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Programming Language :: Python :: 3',
+            'License :: OSI Approved :: MIT License'
+        ],
+
+        include_package_data=True,
+        extras_require={
+            'dev': [
+                'pytest~=6.0', 'pytest-mock~=3.2', 'pydoc-markdown~=3.3'
+            ],
+            'build': [
+                'wheel~=0.34', 'twine~=3.2'
+            ]
+        },
 )

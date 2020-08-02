@@ -1,5 +1,12 @@
 *~
-env/*
-__pycache__/*
-_build
-dist/*
+env/
+__pycache__/
+build/
+dist/
+*.egg-info/
+eggs/
+.eggs/
+*.egg
+MANIFEST
+wheels/
+sdist/

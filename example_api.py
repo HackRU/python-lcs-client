@@ -52,7 +52,7 @@ def require_user(f):
                 'error': 'json body required'
             }), 400
         body = request.json
-        user = lcs_client.User(body['email'], token=body['token'])
+        user = lcs_client.User(token=body['token'])
         return f(*args, user=user, **kwargs)
     return wrapper
 

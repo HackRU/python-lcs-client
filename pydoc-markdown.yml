@@ -1,0 +1,11 @@
+loaders:
+  - type: python
+    packages:
+      - lcs_client
+processors:
+  - type: filter
+  - type: smart
+  - type: crossref
+renderer:
+  type: markdown
+  filename: lcs_client.md

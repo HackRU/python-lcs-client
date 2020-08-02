@@ -1,69 +1,108 @@
-<h1 id="lcs_client">lcs_client</h1>
+<a name="lcs_client"></a>
+# lcs\_client
 
+This is intended to be a server-side client to help with HackRU services that piggyback on lcs login and user data
 
-This is intended to be a serverside client to help with hackru services that biggie back
-on lcs login ang user data
-
-<h2 id="lcs_client.set_root_url">set_root_url</h2>
-
-```python
-set_root_url(url)
-```
-sets root url. defaults to `https://api.hackru.org`
-<h2 id="lcs_client.set_testing">set_testing</h2>
+<a name="lcs_client.set_root_url"></a>
+#### set\_root\_url
 
 ```python
-set_testing(testing)
+set_root_url(url: str) -> None
 ```
-weather or not to use test endpoint, defaults to `False`
-<h2 id="lcs_client.User">User</h2>
+
+Sets root url. defaults to `https://api.hackru.org`
+
+<a name="lcs_client.set_testing"></a>
+#### set\_testing
 
 ```python
-User(self, email, password=None, token=None)
+set_testing(testing: bool) -> None
 ```
 
-a user object to easily call other endpoints on behalf of a user
-constructor logs the user and gets a handle. requires you to pass a token OR a password
+Whether or not to use test endpoint, defaults to `False`
 
-<h3 id="lcs_client.User.profile">profile</h3>
+<a name="lcs_client.User"></a>
+## User Objects
 
 ```python
-User.profile(self)
+class User()
 ```
-call lcs to get the user's profile
-<h3 id="lcs_client.User.dm_link_for">dm_link_for</h3>
+
+A user object to easily call other endpoints on behalf of a user
+
+<a name="lcs_client.User.__init__"></a>
+#### \_\_init\_\_
 
 ```python
-User.dm_link_for(self, other_user)
+ | __init__(email: str = None, password: str = None, token: str = None) -> None
 ```
-get a dm link for another user's slack __NOT IMPLMIMENTED YET__
-<h2 id="lcs_client.ResponseError">ResponseError</h2>
+
+Constructor logs the user and gets a handle. Requires you to pass a token OR an email and password
+
+<a name="lcs_client.User.profile"></a>
+#### profile
 
 ```python
-ResponseError(self, response)
+ | profile() -> Dict
 ```
-error with an attached http Response
-<h2 id="lcs_client.RequestError">RequestError</h2>
+
+Call lcs to get the user's profile
+
+<a name="lcs_client.User.create_dm_link_to"></a>
+#### create\_dm\_link\_to
 
 ```python
-RequestError(self, response)
+ | create_dm_link_to(other_user_email: str)
 ```
-ideally you shouldn't receve this. there was an issue with the input to the api
-<h2 id="lcs_client.CredentialError">CredentialError</h2>
+
+Get a link to a slack DM between this User and another user identified by `other_user_email`
+
+<a name="lcs_client.ResponseError"></a>
+## ResponseError Objects
 
 ```python
-CredentialError(self, response)
+class ResponseError(Exception)
 ```
-there was an issue login in with that credential, or a token is invalid
-<h2 id="lcs_client.on_login">on_login</h2>
+
+Error with an attached HTTP Response
+
+<a name="lcs_client.InternalServerError"></a>
+## InternalServerError Objects
 
 ```python
-on_login(f)
+class InternalServerError(ResponseError)
 ```
 
-decorator. call the decorated function whenever we find a new user
-use case: get their profile and update local db.
-function should take in the user object as the first param
+An error occurred which prevented LCS from servicing the request
+
+<a name="lcs_client.RequestError"></a>
+## RequestError Objects
+
+```python
+class RequestError(ResponseError)
+```
+
+Ideally you shouldn't receive this. There was an issue with the input to the API
+
+<a name="lcs_client.CredentialError"></a>
+## CredentialError Objects
+
+```python
+class CredentialError(RequestError)
+```
+
+There was an issue login in with that credential, or a token is invalid
+
+<a name="lcs_client.on_login"></a>
+#### on\_login
+
+```python
+on_login(fn: Callable)
+```
+
+Decorator. Call the decorated function whenever we find a new user
+Use case: get their profile and update local db.
+Function should take in the user object as the first param
 
 ```python
 @lcs_client.on_login
@@ -71,50 +110,68 @@ def your_func(user_profile):
     # updating the user profile or something
 ```
 
-<h2 id="lcs_client.validate_token">validate_token</h2>
+<a name="lcs_client.login"></a>
+#### login
 
 ```python
-validate_token(email, token)
+login(email: str, password: str) -> str
 ```
-validates an lcs token and email pair
-<h2 id="lcs_client.login">login</h2>
+
+Gets an authentication token by calling the `authorize` LCS endpoint
+
+<a name="lcs_client.validate_token"></a>
+#### validate\_token
 
 ```python
-login(email, password)
+validate_token(token: str) -> Dict
 ```
-gets a token for a user
-<h2 id="lcs_client.get_profile">get_profile</h2>
+
+Validates a lcs token
+
+<a name="lcs_client.get_profile"></a>
+#### get\_profile
 
 ```python
-get_profile(email, token, auth_email=None)
+get_profile(auth_token: str, user_email: str = None) -> Dict
 ```
 
-gets the profile of a user. add auth_email if you are looking at the users profile
-from a different account
+Gets the profile of a user associated with user_email. The permissions associated with the auth_token user are used.
+If no user_email is specified or the user doesn't have enough privilege to view someone else's profile,
+the profile associated with the auth_token is fetched
 
-<h2 id="lcs_client.get_dm_for">get_dm_for</h2>
+<a name="lcs_client.create_dm_link_between"></a>
+#### create\_dm\_link\_between
 
 ```python
-get_dm_for(email, token, other_user)
+create_dm_link_between(token: str, other_user_email: str) -> str
 ```
 
-get a dm link to talk with another user on slack. __NOT YET IMPLEMENTED__
+Get a dm link to talk with another user on slack
 
-<h2 id="lcs_client.base_url">base_url</h2>
+<a name="lcs_client.get_base_url"></a>
+#### get\_base\_url
 
 ```python
-base_url()
+get_base_url() -> str
 ```
-get the lcs base url
-<h2 id="lcs_client.get">get</h2>
+
+Get the LCS base url
+
+<a name="lcs_client.get"></a>
+#### get
 
 ```python
-get(endpoint, *args, **kwargs)
+get(endpoint: str, *args, **kwargs) -> requests.models.Response
 ```
-does get request to lcs endpoint
-<h2 id="lcs_client.post">post</h2>
+
+Performs a GET request to a LCS endpoint
+
+<a name="lcs_client.post"></a>
+#### post
 
 ```python
-post(endpoint, *args, **kwargs)
+post(endpoint: str, *args, **kwargs) -> requests.models.Response
 ```
-does post request to lcs endpoint
+
+Performs a POST request to a LCS endpoint
+
